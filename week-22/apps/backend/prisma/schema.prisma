@@ -1,0 +1,68 @@
+generator client {
+	provider = "prisma-client"
+	output = "./generated"
+	engineType = "client"
+	runtime = "bun"
+}
+
+datasource db {
+	provider = "postgresql"
+}
+
+model User { 
+	id              Int     @id @default(autoincrement()) 
+	username        String  @unique
+	password        String
+  avatars          Avatar[]
+  avatarVideos     AvatarVideo[]
+}
+
+model Avatar { 
+	id                      Int            @id @default(autoincrement()) 
+	userId                  Int
+  name                    String
+  user                    User           @relation(fields: [userId], references: [id])
+  avatarImages            AvatarImage[]
+  videoModelReferences    VideoModelReference[]
+}
+
+model AvatarImage {
+  id          Int                  @id @default(autoincrement()) 
+  avatarId    Int
+  type        AvatarImageType
+  url         String
+  avatar      Avatar               @relation(fields: [avatarId], references: [id])
+}
+
+enum AvatarImageType {
+  userGenerated
+  modelGenerated
+}
+
+model AvatarVideo {
+  id                        Int                       @id @default(autoincrement()) 
+  userId                    Int
+  prompt                    String
+  startFrame                String
+  endFrame                  String
+  duration                  Int
+  height                    Int
+  width                     Int
+  status                    AvatarVideoStatus
+  user                      User                      @relation(fields: [userId], references: [id])
+  videoModelReference       VideoModelReference[]
+}
+
+enum AvatarVideoStatus {
+  Pending
+  Done
+  Error
+}
+
+model VideoModelReference {
+  id              Int         @id @default(autoincrement()) 
+  avatarVideoId   Int
+  avatarId        Int
+  avatar          Avatar      @relation(fields: [avatarId], references: [id])
+  avatarVideo     AvatarVideo @relation(fields: [avatarVideoId], references: [id])
+}
